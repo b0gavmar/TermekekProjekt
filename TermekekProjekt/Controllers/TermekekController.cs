@@ -23,9 +23,31 @@ namespace TermekekProjekt.Controllers
         }
 
         [HttpGet("/api/customers/count")]
-        public async Task<IActionResult> GetPurchaseCount([FromQuery] int min_budget)
+        public async Task<IActionResult> GetCustomerCountByBudget([FromQuery] int min_budget)
         {
             return Ok(_context.Customers.Where(c => c.Budget>=min_budget).Count());
+        }
+
+        [HttpGet("/api/products/category/{category_id}")]
+        public async Task<IActionResult> GetProductsInACategory([FromRoute] int category_id)
+        {
+            return Ok(_context.Products.Where(p => p.Categoryid == category_id));
+        }
+
+        [HttpGet("/api/purchases")]
+        public async Task<IActionResult> GetPurchasesOrdered([FromQuery] string order_by = "date", [FromQuery] bool desc = false)
+        {
+            if (desc)
+            {
+                return Ok(_context.Purchases.OrderByDescending(p => p.Date));
+            }
+            return Ok(_context.Purchases.OrderBy(p => p.Date));
+        }
+
+        [HttpGet("/api/customers")]
+        public async Task<IActionResult> GetCustomersByBudget([FromQuery] int min_budget)
+        {
+            return Ok(_context.Customers.Where(c => c.Budget >= min_budget));
         }
     }
 }
