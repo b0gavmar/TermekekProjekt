@@ -120,6 +120,30 @@ namespace TermekekProjekt.Controllers
             return Ok(_context.Customers.Where(c => c.Id == customer_id).Select(c => c.Budget));
         }*/
 
+        [HttpGet("/api/purchases/date")]
+        public async Task<IActionResult> GetPurchasesByDate([FromQuery] DateOnly? start_date = null, [FromQuery] DateOnly? end_date = null)
+        {
+            if(start_date > end_date)
+            {
+                return BadRequest("Start date must be less than or equal to end date.");
+            }
+            if(start_date == null || end_date == null)
+            {
+                return BadRequest("Start date and end date cannot be null.");
+            }
+            return Ok(_context.Purchases.Where(p => p.Date >= start_date && p.Date <= end_date));
+        }
 
+        [HttpGet("/api/customers/budget")]
+        public async Task<IActionResult> GetCustomersByBudget([FromQuery] int min_budget = 0, [FromQuery] int max_budget = int.MaxValue)
+        {
+            return Ok(_context.Customers.Where(c => c.Budget >= min_budget && c.Budget <= max_budget));
+        }
+
+        [HttpGet("/api/products/price")]
+        public async Task<IActionResult> GetProductByPrise([FromQuery] int min = 0, [FromQuery] int max = int.MaxValue)
+        {
+            return Ok(_context.Products.Where(p=>p.Price>=min && p.Price<=max));
+        }
     }
 }
