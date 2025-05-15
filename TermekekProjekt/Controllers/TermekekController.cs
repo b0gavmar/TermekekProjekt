@@ -93,5 +93,33 @@ namespace TermekekProjekt.Controllers
 
             return Ok(mostPurchased);
         }
+
+        [HttpGet("/api/customer/{customer_id}")]
+        public async Task<IActionResult> GetCustomerPurchases([FromRoute] int customer_id)
+        {
+            return Ok(_context.Purchases.Where(p => p.CustomerId == customer_id));
+        }
+
+        /* nem lehet megcsinálni mert nincs purchase_id meg egy vásárlásban egy termék van
+        [HttpGet("/api/purchases/{purchase_id}/products")]
+        public async Task<IActionResult> GetPurchasedProducts([FromRoute] int purchase_id)
+        {
+        }*/
+
+        [HttpGet("/api/products/{product_id}/stock")]
+        public async Task<IActionResult> GetProductStock([FromRoute] int product_id)
+        {
+            return Ok(_context.Products.Where(p => p.Id == product_id).Select(p => p.Stock));
+        }
+
+        /*
+        így kéne megoldani, ha lenne a felhasználónak id-je :)
+        [HttpGet("/api/products/{customer_id}/budget")]
+        public async Task<IActionResult> GetCustomerBudget([FromRoute] int customer_id)
+        {
+            return Ok(_context.Customers.Where(c => c.Id == customer_id).Select(c => c.Budget));
+        }*/
+
+
     }
 }
