@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using TermekekProjekt.Models;
 
 namespace TermekekProjekt.Controllers
@@ -48,6 +50,48 @@ namespace TermekekProjekt.Controllers
         public async Task<IActionResult> GetCustomersByBudget([FromQuery] int min_budget)
         {
             return Ok(_context.Customers.Where(c => c.Budget >= min_budget));
+        }
+
+        [HttpGet("/api/products/count_by_category")]
+        public async Task<IActionResult> GetProductsCountByCategory()
+        {
+            return Ok(_context.Products.GroupBy(p => p.Categoryid).Select(g => new { category_id = g.Key, count = g.ToList() }));
+        }
+
+        [HttpGet("/api/products/average_price_by_category")]
+        public async Task<IActionResult> GetProductsAvgPriceByCategory()
+        {
+            return Ok(_context.Products.GroupBy(p => p.Categoryid).Select(g => new { category_id = g.Key, avg_price = g.Average(p => p.Price) }));
+        }
+
+        [HttpGet("/api/purchases/total_spent_by_customer")]
+        public async Task<IActionResult> GetSpentByCustomer()
+        {
+            return Ok(_context.Purchases
+                                .Join(_context.Products, p => p.ProductId, pr => pr.Id, (p, pr) => new { customer_id = p.CustomerId, Price = pr.Price * p.Quantity })
+                                .GroupBy(p => p.customer_id)
+                                .Select(g=> new { kulcs = g.Key, ertek = g.Sum(p=>p.Price)}));
+        }
+
+        [HttpGet("/api/purchases/most_purchesed_product")]
+        public async Task<IActionResult> GetMostPurchased()
+        {
+            var grouped = await _context.Purchases
+                .GroupBy(p => p.ProductId)
+                .Select(g => new
+                {
+                    ProductId = g.Key,
+                    TotalQuantity = g.Sum(p => p.Quantity)
+                })
+                .ToListAsync();
+
+            var maxQuantity = grouped.Max(g => g.TotalQuantity);
+
+            var mostPurchased = grouped
+                .Where(g => g.TotalQuantity == maxQuantity)
+                .ToList();
+
+            return Ok(mostPurchased);
         }
     }
 }
